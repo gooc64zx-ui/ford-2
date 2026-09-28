@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>64 Car Control Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Permanent+Marker&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    body {
+      background-color: #03081e;
+      color: white;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 450px;
+      height: 100vh;
+      background-color: #03081e;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: background 0.3s ease;
+    }
+
+    /* الشريط العلوي */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background-color: #020617;
+      border-bottom: 2px solid #0f172a;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #ffb703;
+      text-shadow: 2px 2px 0px #b88600, 4px 4px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    .icons-nav {
+      display: flex;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 4px 8px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 183, 3, 0.15);
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 3px;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn img {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .nav-btn:active {
+      transform: scale(0.88);
+    }
+
+    .nav-btn.active {
+      border-color: #ffb703;
+      background: rgba(255, 183, 3, 0.12);
+      box-shadow: 0 0 15px rgba(255, 183, 3, 0.4);
+      animation: navPulse 2s infinite alternate;
+    }
+
+    @keyframes navPulse {
+      0% { box-shadow: 0 0 8px rgba(255, 183, 3, 0.3); }
+      100% { box-shadow: 0 0 20px rgba(255, 183, 3, 0.7); }
+    }
+
+    /* قسم عرض السيارة */
+    .car-section {
+      padding: 15px 10px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .car-container {
+      position: relative;
+      width: 100%;
+      height: 205px;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .car-slide-item {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transform: scale(1.15);
+      filter: blur(4px);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out, filter 0.25s ease-out;
+      pointer-events: none;
+    }
+
+    .car-slide-item.active-slide {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+      pointer-events: auto;
+    }
+
+    .car-base-img,
+    .light-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      border-radius: 20px;
+    }
+
+    .car-base-img {
+      z-index: 1;
+      opacity: 1 !important;
+    }
+
+    /* تأثير التدرج والتلاشي على أطراف صور النمط الداكن */
+    .car-base-img.faded-edges {
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+    }
+
+    .light-layer {
+      z-index: 2;
+      pointer-events: none;
+      mix-blend-mode: lighten;
+      opacity: 0;
+      transition: opacity 0.1s linear;
+    }
+
+    /* شبكة بطاقات الصفحة الأولى */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 15px;
+      padding: 10px 15px 20px 15px;
+      flex: 1;
+    }
+
+    .card {
+      background: #080f28;
+      border: 1px solid #131d42;
+      border-radius: 24px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .card:active {
+      transform: scale(0.96);
+      background: #0c163a;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .percentage {
+      font-family: 'Permanent Marker', cursive, sans-serif;
+      font-size: 3.2rem;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .bulb-icon {
+      font-size: 2.5rem;
+      color: #71717a;
+      transition: color 0.3s, filter 0.3s;
+    }
+
+    .card-title {
+      font-family: 'Permanent Marker', cursive, sans-serif;
+      font-size: 2.1rem;
+      color: #e2e8f0;
+      line-height: 1.05;
+      margin-top: 5px;
+    }
+
+    /* الخلفية العادية للصفحة الثانية */
+    .container.rear-active,
+    .slider-modal.rear-modal-active {
+      background: linear-gradient(to top, #03081e 0%, #03081e 15%, #080f28 26%, #131d42 35%, #475569 44%, #94a3b8 52%, #ffffff 60%, #ffffff 100%) !important;
+    }
+
+    /* النمط الداكن */
+    .slider-modal.dark-mode-active {
+      background: linear-gradient(to top, #03081e 0%, #03081e 15%, #080f28 26%, #0e1736 35%, #171b20 44%, #161616 52%, #020202 60%, #000000 100%) !important;
+    }
+
+    .glass-cards-grid {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 15px;
+      padding: 10px 15px 20px 15px;
+      flex: 1;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 24px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s, border-color 0.2s;
+    }
+
+    .glass-card:active {
+      transform: scale(0.96);
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .glass-card .percentage {
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .glass-card .card-title {
+      color: #f1f5f9;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* نافذة السلايدر المنبثقة */
+    .slider-modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #03081e;
+      display: none;
+      flex-direction: column;
+      z-index: 100;
+      transition: background 0.3s ease;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      color: white;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .back-btn:active {
+      transform: scale(0.9);
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .modal-header {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 2rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      text-align: center;
+      margin: 15px 0 10px 0;
+      color: #ffb703;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      direction: ltr;
+      transition: color 0.3s;
+    }
+
+    .modal-content-area {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      direction: ltr;
+      padding: 0 20px 30px 20px;
+      position: relative;
+    }
+
+    .modal-left-control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-bulb-container {
+      width: 85px;
+      height: 85px;
+      background: rgba(40, 50, 90, 0.4);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 25px rgba(255, 183, 3, 0.15);
+      transition: box-shadow 0.2s, background 0.2s;
+    }
+
+    .modal-bulb {
+      font-size: 3rem;
+      color: #ffb703;
+      transition: color 0.2s, filter 0.2s;
+    }
+
+    /* زر النمط الداكن */
+    .dark-mode-btn {
+      width: 45px;
+      height: 45px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .dark-mode-btn.active {
+      background: #ffb703;
+      color: #03081e;
+      border-color: #ffb703;
+      box-shadow: 0 0 15px rgba(255, 183, 3, 0.5);
+    }
+
+    .dark-mode-btn:active {
+      transform: scale(0.9);
+    }
+
+    .vertical-slider-track {
+      position: relative;
+      width: 95px;
+      height: 330px;
+      background: #1e2840;
+      border-radius: 50px;
+      overflow: visible;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.7), 0 8px 25px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: opacity 0.3s, filter 0.3s;
+    }
+
+    .vertical-slider-track.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+      filter: grayscale(80%);
+    }
+
+    .fill-clip-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .slider-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(to top, #ffb703, #ffe082);
+      opacity: 0.85;
+      pointer-events: none;
+      transition: height 0.05s ease-out, filter 0.2s, opacity 0.2s, background 0.3s;
+    }
+
+    input[type=range].vertical-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      position: absolute;
+      width: 330px;
+      height: 105px;
+      background: transparent;
+      outline: none;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      cursor: pointer;
+      z-index: 5;
+    }
+
+    input[type=range].vertical-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 105px;
+      height: 105px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e2e8f0 60%, #94a3b8 100%);
+      border: 3px solid #ffffff;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.6), inset 0 -4px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    .ticks-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 330px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      transition: color 0.3s, opacity 0.3s;
+    }
+
+    .tick-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #64748b;
+      transition: all 0.2s ease;
+    }
+
+    .tick-line {
+      width: 14px;
+      height: 3px;
+      background-color: #64748b;
+      border-radius: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .sub-tick-line {
+      width: 8px;
+      height: 2px;
+      background-color: #334155;
+      margin-left: 0px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    .tick-text {
+      font-size: 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .tick-row.active {
+      color: #ffffff;
+      transform: scale(1.25) translateX(-4px);
+    }
+
+    .tick-row.active .tick-line {
+      background-color: #ffffff;
+      width: 22px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    .tick-row.active .tick-text {
+      font-weight: 900;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="mainContainer">
+    <!-- الشريط العلوي -->
+    <div class="top-bar">
+      <div class="logo">64</div>
+      <div class="icons-nav">
+        <button class="nav-btn active" id="nav-interior" onclick="switchTab('interior')"><img src="dashboard.jpg.jpg" alt="Interior"></button>
+        <button class="nav-btn" id="nav-rear" onclick="switchTab('rear')"><img src="car_rear.jpg.jpg" alt="Rear"></button>
+      </div>
+    </div>
+
+    <!-- عرض السيارة الداخلي (الصفحة الأولى) - اسم الصورة الصحيح car_base.jpg.jpg -->
+    <div class="car-section" id="interior-car-section">
+      <div class="car-container">
+        <img src="car_base.jpg.jpg" class="car-base-img" alt="منظر المقاعد الداخلية">
+        <img src="footwell_light.jpg" class="light-layer" id="layer-footwell" alt="Footwell Light">
+        <img src="center_light.jpg" class="light-layer" id="layer-center" alt="Center Light">
+        <img src="left_light.jpg" class="light-layer" id="layer-left" alt="Left Light">
+        <img src="right_light.jpg" class="light-layer" id="light-right" alt="Right Light">
+      </div>
+    </div>
+
+    <!-- عرض السيارة الخارجي السينمائي (الصفحة الثانية) -->
+    <div class="car-section" id="rear-car-section" style="display: none;">
+      <div class="car-container">
+        <div class="car-slide-item active-slide" id="rear-slide-1">
+          <img src="car_base_rear.jpg" class="car-base-img" id="base-img-1" alt="Car Base Rear">
+          <img src="left_light_layer.png" class="light-layer" id="rear-layer-left" alt="Left Light Layer">
+        </div>
+        <div class="car-slide-item" id="rear-slide-2">
+          <img src="final_flipped_exact.jpg" class="car-base-img" id="base-img-2" alt="Car Base Right">
+          <img src="car4.jpg" class="light-layer" id="rear-layer-right" alt="Right Light Layer">
+        </div>
+        <div class="car-slide-item" id="rear-slide-3">
+          <img src="car1.jpg" class="car-base-img" id="hood-base-img" alt="Hood Base">
+          <img src="182638_RESIZED_TO_SilverSUV_EXACT.webp" class="light-layer" id="rear-layer-hood" alt="Hood Light Layer">
+        </div>
+      </div>
+    </div>
+
+    <!-- بطاقات الصفحة الأولى -->
+    <div class="cards-grid" id="interior-view">
+      <div class="card" id="card1">
+        <div class="card-top">
+          <span class="percentage" id="val1">67%</span>
+          <i class="fa-solid fa-lightbulb bulb-icon" id="bulb1"></i>
+        </div>
+        <div class="card-title">Footwell<br>lights</div>
+      </div>
+      <div class="card" id="card2">
+        <div class="card-top">
+          <span class="percentage" id="val2">34%</span>
+          <i class="fa-solid fa-lightbulb bulb-icon" id="bulb2"></i>
+        </div>
+        <div class="card-title">Center<br>light</div>
+      </div>
+      <div class="card" id="card3">
+        <div class="card-top">
+          <span class="percentage" id="val3">100%</span>
+          <i class="fa-solid fa-lightbulb bulb-icon" id="bulb3"></i>
+        </div>
+        <div class="card-title">Left<br>light</div>
+      </div>
+      <div class="card" id="card4">
+        <div class="card-top">
+          <span class="percentage" id="val4">0%</span>
+          <i class="fa-solid fa-lightbulb bulb-icon" id="bulb4"></i>
+        </div>
+        <div class="card-title">Right<br>light</div>
+      </div>
+    </div>
+
+    <!-- بطاقات الصفحة الثانية -->
+    <div class="glass-cards-grid" id="rear-view">
+      <div class="glass-card" id="glass-card1" onclick="selectRearCard(1)">
+        <div class="card-top">
+          <span class="percentage" id="g-val1">100%</span>
+          <i class="fa-solid fa-lightbulb bulb-icon" id="g-bulb1" style="color: #ffb703;"></i>
+        </div>
+        <div class="card-title">Left<br>lighting</div>
+      </div>
+      <div class="glass-card" id="glass-card2" onclick="selectRearCard(2)">
+        <div class="card-top">
+          <span class="percentage" id="g-val2">100%</span>
+          <i class="fa-solid fa-lightbulb bulb-icon" id="g-bulb2"></i>
+        </div>
+        <div class="card-title">Right<br>lighting</div>
+      </div>
+      <div class="glass-card" id="glass-card3" onclick="selectRearCard(3)">
+        <div class="card-top">
+          <span class="percentage" id="g-val3">0%</span>
+          <i class="fa-solid fa-lightbulb bulb-icon" id="g-bulb3"></i>
+        </div>
+        <div class="card-title">Hood<br>light</div>
+      </div>
+      <div class="glass-card" id="glass-card4" onclick="selectRearCard(4)">
+        <div class="card-top">
+          <span class="percentage" id="g-val4">0%</span>
+          <i class="fa-solid fa-lightbulb bulb-icon" id="g-bulb4"></i>
+        </div>
+        <div class="card-title">Under<br>glow</div>
+      </div>
+    </div>
+
+    <!-- نافذة السلايدر المنبثقة -->
+    <div class="slider-modal" id="sliderModal">
+      <div class="top-bar">
+        <button class="back-btn" onclick="closeControl()"><i class="fa-solid fa-arrow-right"></i></button>
+        <div class="logo">64</div>
+      </div>
+
+      <div class="car-section">
+        <div class="car-container" id="modalInteriorCar" style="display: flex;">
+          <img src="car_base.jpg.jpg" class="car-base-img" alt="منظر المقاعد الداخلية">
+          <img src="footwell_light.jpg" class="light-layer" id="modal-layer-footwell" alt="Footwell Light">
+          <img src="center_light.jpg" class="light-layer" id="modal-layer-center" alt="Center Light">
+          <img src="left_light.jpg" class="light-layer" id="modal-layer-left" alt="Left Light">
+          <img src="right_light.jpg" class="light-layer" id="modal-layer-right" alt="Right Light">
+        </div>
+        
+        <div class="car-container" id="modalRearCarWrapper" style="display: none;">
+          <div class="car-slide-item active-slide" id="modal-slide-1">
+            <img src="car_base_rear.jpg" class="car-base-img" id="modal-base-img-1" alt="Car Base Rear">
+            <img src="left_light_layer.png" class="light-layer" id="modal-rear-layer-left" alt="Left Light Layer">
+          </div>
+          <div class="car-slide-item" id="modal-slide-2">
+            <img src="final_flipped_exact.jpg" class="car-base-img" id="modal-base-img-2" alt="Car Base Right">
+            <img src="car4.jpg" class="light-layer" id="modal-rear-layer-right" alt="Right Light Layer">
+          </div>
+          <div class="car-slide-item" id="modal-slide-3">
+            <img src="car1.jpg" class="car-base-img" id="modal-hood-base-img" alt="Modal Hood Base">
+            <img src="182638_RESIZED_TO_SilverSUV_EXACT.webp" class="light-layer" id="modal-rear-layer-hood" alt="Hood Light Layer">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-header">
+        <span id="modalValue">100%</span>
+        <span id="modalTitle">CENTER LIGHT</span>
+      </div>
+
+      <div class="modal-content-area">
+        <div class="modal-left-control-group">
+          <div class="modal-bulb-container" id="modalBulbBg">
+            <i class="fa-solid fa-lightbulb modal-bulb" id="modalBulbIcon"></i>
+          </div>
+          <button class="dark-mode-btn" id="darkModeBtn" onclick="toggleDarkMode()" title="النمط الداكن">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+        </div>
+
+        <div class="vertical-slider-track" id="sliderTrackContainer">
+          <div class="fill-clip-container">
+            <div class="slider-fill" id="sliderFill"></div>
+          </div>
+          <input type="range" class="vertical-slider" id="activeSlider" min="0" max="100" value="50" oninput="onSliderChange(this.value)">
+        </div>
+
+        <div class="ticks-labels" id="ticksLabelsContainer">
+          <div class="tick-row" id="tick-100"><div class="tick-line"></div><span class="tick-text">100%</span></div>
+          <div class="sub-tick-line"></div>
+          <div class="tick-row" id="tick-80"><div class="tick-line"></div><span class="tick-text">80%</span></div>
+          <div class="sub-tick-line"></div>
+          <div class="tick-row" id="tick-60"><div class="tick-line"></div><span class="tick-text">60%</span></div>
+          <div class="sub-tick-line"></div>
+          <div class="tick-row" id="tick-40"><div class="tick-line"></div><span class="tick-text">40%</span></div>
+          <div class="sub-tick-line"></div>
+          <div class="tick-row" id="tick-20"><div class="tick-line"></div><span class="tick-text">20%</span></div>
+          <div class="sub-tick-line"></div>
+          <div class="tick-row" id="tick-0"><div class="tick-line"></div><span class="tick-text">0%</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const lightData = {
+      1: { name: 'FOOTWELL LIGHTS', val: 67, lastVal: 67, layerId: 'layer-footwell', modalLayerId: 'modal-layer-footwell' },
+      2: { name: 'CENTER LIGHT', val: 34, lastVal: 34, layerId: 'layer-center', modalLayerId: 'modal-layer-center' },
+      3: { name: 'LEFT LIGHT', val: 100, lastVal: 100, layerId: 'layer-left', modalLayerId: 'modal-layer-left' },
+      4: { name: 'RIGHT LIGHT', val: 0, lastVal: 100, layerId: 'layer-right', modalLayerId: 'modal-layer-right' }
+    };
+
+    const glassLightData = {
+      1: { name: 'LEFT LIGHTING', val: 100, lastVal: 100, layerId: 'rear-layer-left', modalLayerId: 'modal-rear-layer-left', slideId: 1, isDarkMode: false },
+      2: { name: 'RIGHT LIGHTING', val: 100, lastVal: 100, layerId: 'rear-layer-right', modalLayerId: 'modal-rear-layer-right', slideId: 2, isDarkMode: false },
+      3: { name: 'HOOD LIGHT', val: 0, lastVal: 100, layerId: 'rear-layer-hood', modalLayerId: 'modal-rear-layer-hood', slideId: 3, isDarkMode: false },
+      4: { name: 'UNDERGLOW', val: 0, lastVal: 100 }
+    };
+
+    let activeCardId = null;
+    let activeMode = 'interior';
+    let currentSlide = 1;
+    let lastVibrateTime = 0;
+
+    function triggerVibration(duration = 35) {
+      if (navigator.vibrate) {
+        navigator.vibrate(duration);
+      }
+    }
+
+    function dynamicVibration() {
+      const now = Date.now();
+      if (now - lastVibrateTime > 70) {
+        triggerVibration(15);
+        lastVibrateTime = now;
+      }
+    }
+
+    function selectRearCard(id) {
+      currentSlide = id;
+      for(let i=1; i<=3; i++) {
+        const slide = document.getElementById(`rear-slide-${i}`);
+        if(slide) {
+          if(i === id) slide.classList.add('active-slide');
+          else slide.classList.remove('active-slide');
+        }
+      }
+
+      if(id === 1) {
+        const base1 = document.getElementById('base-img-1');
+        const layer1 = document.getElementById('rear-layer-left');
+        if(glassLightData[1].isDarkMode) {
+          if(base1) { base1.src = 'car6_NIGHT_DARK_WARM_WHITE_EXACT_SIZE_2.webp'; base1.classList.add('faded-edges'); }
+          if(layer1) layer1.style.display = 'none';
+        } else {
+          if(base1) { base1.src = 'car_base_rear.jpg'; base1.classList.remove('faded-edges'); }
+          if(layer1) layer1.style.display = 'block';
+        }
+      }
+
+      if(id === 2) {
+        const base2 = document.getElementById('base-img-2');
+        const layer2 = document.getElementById('rear-layer-right');
+        if(glassLightData[2].isDarkMode) {
+          if(base2) { base2.src = 'car6_NIGHT_DARK_FLIPPED_EXACT.jpg'; base2.classList.add('faded-edges'); }
+          if(layer2) layer2.style.display = 'none';
+        } else {
+          if(base2) { base2.src = 'final_flipped_exact.jpg'; base2.classList.remove('faded-edges'); }
+          if(layer2) layer2.style.display = 'block';
+        }
+      }
+
+      if(id === 3) {
+        const hoodBase = document.getElementById('hood-base-img');
+        const hoodLayer = document.getElementById('rear-layer-hood');
+        if(glassLightData[3].isDarkMode) {
+          if(hoodBase) { hoodBase.src = 'image_20260925_WARM_WHITE_HIGH_QUALITY_2384x1008.webp'; hoodBase.classList.add('faded-edges'); }
+          if(hoodLayer) hoodLayer.style.display = 'none';
+        } else {
+          if(hoodBase) {
+            hoodBase.classList.remove('faded-edges');
+            if(glassLightData[3].val === 0) {
+              hoodBase.src = 'car1.jpg';
+            } else {
+              hoodBase.src = '04_Front_3-4_Wide-edited (1).jpg';
+            }
+          }
+          if(hoodLayer) hoodLayer.style.display = 'block';
+        }
+      }
+    }
+
+    function switchTab(tab) {
+      triggerVibration(40);
+      activeMode = tab;
+      const btnInterior = document.getElementById('nav-interior');
+      const btnRear = document.getElementById('nav-rear');
+      const interiorView = document.getElementById('interior-view');
+      const rearView = document.getElementById('rear-view');
+      const interiorCarSec = document.getElementById('interior-car-section');
+      const rearCarSec = document.getElementById('rear-car-section');
+      const mainContainer = document.getElementById('mainContainer');
+
+      if (tab === 'interior') {
+        btnInterior.classList.add('active');
+        btnRear.classList.remove('active');
+        interiorView.style.display = 'grid';
+        rearView.style.display = 'none';
+        interiorCarSec.style.display = 'flex';
+        rearCarSec.style.display = 'none';
+        mainContainer.classList.remove('rear-active');
+      } else {
+        btnRear.classList.add('active');
+        btnInterior.classList.remove('active');
+        interiorView.style.display = 'none';
+        rearView.style.display = 'grid';
+        interiorCarSec.style.display = 'none';
+        rearCarSec.style.display = 'flex';
+        mainContainer.classList.add('rear-active');
+        selectRearCard(currentSlide);
+      }
+    }
+
+    function toggleDarkMode() {
+      triggerVibration(40);
+      if ((activeCardId !== 1 && activeCardId !== 2 && activeCardId !== 3) || activeMode !== 'rear') return;
+      const data = glassLightData[activeCardId];
+      data.isDarkMode = !data.isDarkMode;
+
+      const darkModeBtn = document.getElementById('darkModeBtn');
+      const sliderModal = document.getElementById('sliderModal');
+      const sliderTrack = document.getElementById('sliderTrackContainer');
+      const ticksLabels = document.getElementById('ticksLabelsContainer');
+
+      if (activeCardId === 1) {
+        const modalBase1 = document.getElementById('modal-base-img-1');
+        const modalLayer1 = document.getElementById('modal-rear-layer-left');
+        const mainBase1 = document.getElementById('base-img-1');
+        const mainLayer1 = document.getElementById('rear-layer-left');
+
+        if (data.isDarkMode) {
+          darkModeBtn.classList.add('active');
+          sliderModal.classList.add('dark-mode-active');
+          sliderTrack.classList.add('disabled');
+          ticksLabels.style.color = 'rgba(255, 255, 255, 0.3)';
+          
+          if(modalBase1) { modalBase1.src = 'car6_NIGHT_DARK_WARM_WHITE_EXACT_SIZE_2.webp'; modalBase1.classList.add('faded-edges'); }
+          if(modalLayer1) modalLayer1.style.display = 'none';
+          if(mainBase1) { mainBase1.src = 'car6_NIGHT_DARK_WARM_WHITE_EXACT_SIZE_2.webp'; mainBase1.classList.add('faded-edges'); }
+          if(mainLayer1) mainLayer1.style.display = 'none';
+
+          onSliderChange(100);
+          document.getElementById('activeSlider').value = 100;
+        } else {
+          darkModeBtn.classList.remove('active');
+          sliderModal.classList.remove('dark-mode-active');
+          sliderTrack.classList.remove('disabled');
+          ticksLabels.style.color = '#64748b';
+
+          if(modalBase1) { modalBase1.src = 'car_base_rear.jpg'; modalBase1.classList.remove('faded-edges'); }
+          if(modalLayer1) modalLayer1.style.display = 'block';
+          if(mainBase1) { mainBase1.src = 'car_base_rear.jpg'; mainBase1.classList.remove('faded-edges'); }
+          if(mainLayer1) mainLayer1.style.display = 'block';
+        }
+      } else if (activeCardId === 2) {
+        const modalBase2 = document.getElementById('modal-base-img-2');
+        const modalLayer2 = document.getElementById('modal-rear-layer-right');
+        const mainBase2 = document.getElementById('base-img-2');
+        const mainLayer2 = document.getElementById('rear-layer-right');
+
+        if (data.isDarkMode) {
+          darkModeBtn.classList.add('active');
+          sliderModal.classList.add('dark-mode-active');
+          sliderTrack.classList.add('disabled');
+          ticksLabels.style.color = 'rgba(255, 255, 255, 0.3)';
+          
+          if(modalBase2) { modalBase2.src = 'car6_NIGHT_DARK_FLIPPED_EXACT.jpg'; modalBase2.classList.add('faded-edges'); }
+          if(modalLayer2) modalLayer2.style.display = 'none';
+          if(mainBase2) { mainBase2.src = 'car6_NIGHT_DARK_FLIPPED_EXACT.jpg'; mainBase2.classList.add('faded-edges'); }
+          if(mainLayer2) mainLayer2.style.display = 'none';
+
+          onSliderChange(100);
+          document.getElementById('activeSlider').value = 100;
+        } else {
+          darkModeBtn.classList.remove('active');
+          sliderModal.classList.remove('dark-mode-active');
+          sliderTrack.classList.remove('disabled');
+          ticksLabels.style.color = '#64748b';
+
+          if(modalBase2) { modalBase2.src = 'final_flipped_exact.jpg'; modalBase2.classList.remove('faded-edges'); }
+          if(modalLayer2) modalLayer2.style.display = 'block';
+          if(mainBase2) { mainBase2.src = 'final_flipped_exact.jpg'; mainBase2.classList.remove('faded-edges'); }
+          if(mainLayer2) mainLayer2.style.display = 'block';
+        }
+      } else if (activeCardId === 3) {
+        const modalHoodBase = document.getElementById('modal-hood-base-img');
+        const modalHoodLayer = document.getElementById('modal-rear-layer-hood');
+        const mainHoodBase = document.getElementById('hood-base-img');
+        const mainHoodLayer = document.getElementById('rear-layer-hood');
+
+        if (data.isDarkMode) {
+          darkModeBtn.classList.add('active');
+          sliderModal.classList.add('dark-mode-active');
+          sliderTrack.classList.add('disabled');
+          ticksLabels.style.color = 'rgba(255, 255, 255, 0.3)';
+          
+          if(modalHoodBase) { modalHoodBase.src = 'image_20260925_WARM_WHITE_HIGH_QUALITY_2384x1008.webp'; modalHoodBase.classList.add('faded-edges'); }
+          if(modalHoodLayer) modalHoodLayer.style.display = 'none';
+          if(mainHoodBase) { mainHoodBase.src = 'image_20260925_WARM_WHITE_HIGH_QUALITY_2384x1008.webp'; mainHoodBase.classList.add('faded-edges'); }
+          if(mainHoodLayer) mainHoodLayer.style.display = 'none';
+
+          onSliderChange(100);
+          document.getElementById('activeSlider').value = 100;
+        } else {
+          darkModeBtn.classList.remove('active');
+          sliderModal.classList.remove('dark-mode-active');
+          sliderTrack.classList.remove('disabled');
+          ticksLabels.style.color = '#64748b';
+
+          if(modalHoodBase) { modalHoodBase.src = 'car1.jpg'; modalHoodBase.classList.remove('faded-edges'); }
+          if(modalHoodLayer) modalHoodLayer.style.display = 'block';
+          if(mainHoodBase) { mainHoodBase.src = 'car1.jpg'; mainHoodBase.classList.remove('faded-edges'); }
+          if(mainHoodLayer) mainHoodLayer.style.display = 'block';
+        }
+      }
+    }
+
+    function updateCardUI(id) {
+      const data = lightData[id];
+      document.getElementById(`val${id}`).innerText = `${data.val}%`;
+      const bulb = document.getElementById(`bulb${id}`);
+      
+      if (data.val == 0) {
+        bulb.style.color = '#52525b';
+        bulb.style.filter = 'none';
+      } else {
+        const opacity = data.val / 100;
+        bulb.style.color = `rgba(255, 183, 3, ${Math.max(opacity, 0.3)})`;
+        bulb.style.filter = `drop-shadow(0 0 ${data.val / 5}px rgba(255, 183, 3, ${opacity}))`;
+      }
+
+      const opacityValue = data.val / 100;
+      const layerEl = document.getElementById(data.layerId);
+      const modalLayerEl = document.getElementById(data.modalLayerId);
+      
+      if (layerEl) layerEl.style.opacity = opacityValue;
+      if (modalLayerEl) modalLayerEl.style.opacity = opacityValue;
+    }
+
+    function updateGlassCardUI(id) {
+      const data = glassLightData[id];
+      document.getElementById(`g-val${id}`).innerText = `${data.val}%`;
+      const bulb = document.getElementById(`g-bulb${id}`);
+      
+      if (data.val == 0) {
+        bulb.style.color = '#71717a';
+        bulb.style.filter = 'none';
+      } else {
+        const opacity = data.val / 100;
+        bulb.style.color = `rgba(255, 183, 3, ${Math.max(opacity, 0.3)})`;
+        bulb.style.filter = `drop-shadow(0 0 ${data.val / 5}px rgba(255, 183, 3, ${opacity}))`;
+      }
+
+      if (data.layerId) {
+        const opacityValue = data.val / 100;
+        const layerEl = document.getElementById(data.layerId);
+        const modalLayerEl = document.getElementById(data.modalLayerId);
+        if (layerEl && !data.isDarkMode) layerEl.style.opacity = opacityValue;
+        if (modalLayerEl && !data.isDarkMode) modalLayerEl.style.opacity = opacityValue;
+      }
+    }
+
+    function setupCardEvents(id) {
+      const card = document.getElementById(`card${id}`);
+      let pressTimer = null;
+      let isLongPress = false;
+
+      const start = () => {
+        isLongPress = false;
+        pressTimer = setTimeout(() => {
+          isLongPress = true;
+          triggerVibration(45);
+          openControl(id);
+        }, 450);
+      };
+
+      const cancel = () => clearTimeout(pressTimer);
+
+      const click = () => {
+        if (!isLongPress) {
+          triggerVibration(35);
+          if (lightData[id].val > 0) {
+            lightData[id].lastVal = lightData[id].val;
+            lightData[id].val = 0;
+          } else {
+            lightData[id].val = lightData[id].lastVal || 100;
+          }
+          updateCardUI(id);
+        }
+      };
+
+      card.addEventListener('mousedown', start);
+      card.addEventListener('touchstart', start);
+      card.addEventListener('mouseup', cancel);
+      card.addEventListener('mouseleave', cancel);
+      card.addEventListener('touchend', cancel);
+      card.addEventListener('click', click);
+    }
+
+    function setupGlassCardEvents(id) {
+      const card = document.getElementById(`glass-card${id}`);
+      let pressTimer = null;
+      let isLongPress = false;
+
+      const start = () => {
+        isLongPress = false;
+        pressTimer = setTimeout(() => {
+          isLongPress = true;
+          triggerVibration(45);
+          openControl(id);
+        }, 450);
+      };
+
+      const cancel = () => clearTimeout(pressTimer);
+
+      const click = () => {
+        if (!isLongPress) {
+          triggerVibration(35);
+          const data = glassLightData[id];
+          if (id <= 3) {
+            if ((id === 1 || id === 2 || id === 3) && data.isDarkMode) {
+              activeCardId = id;
+              toggleDarkMode();
+            } else {
+              if (data.val > 0) {
+                data.lastVal = data.val;
+                data.val = 0;
+              } else {
+                data.val = data.lastVal || 100;
+              }
+              updateGlassCardUI(id);
+            }
+          }
+          if (data.slideId) {
+            selectRearCard(data.slideId);
+          }
+        }
+      };
+
+      card.addEventListener('mousedown', start);
+      card.addEventListener('touchstart', start);
+      card.addEventListener('mouseup', cancel);
+      card.addEventListener('mouseleave', cancel);
+      card.addEventListener('touchend', cancel);
+      card.addEventListener('click', click);
+    }
+
+    function openControl(id) {
+      activeCardId = id;
+      const data = (activeMode === 'interior') ? lightData[id] : glassLightData[id];
+
+      document.getElementById('modalTitle').innerText = data.name;
+      document.getElementById('modalValue').innerText = `${data.val}%`;
+      document.getElementById('activeSlider').value = data.val;
+
+      const modalInterior = document.getElementById('modalInteriorCar');
+      const modalRearWrapper = document.getElementById('modalRearCarWrapper');
+      const sliderModal = document.getElementById('sliderModal');
+      const darkModeBtn = document.getElementById('darkModeBtn');
+
+      if (activeMode === 'rear' && (id === 1 || id === 2 || id === 3)) {
+        darkModeBtn.style.display = 'flex';
+        if (data.isDarkMode) {
+          sliderModal.classList.add('dark-mode-active');
+          darkModeBtn.classList.add('active');
+          document.getElementById('sliderTrackContainer').classList.add('disabled');
+          document.getElementById('ticksLabelsContainer').style.color = 'rgba(255, 255, 255, 0.3)';
+        } else {
+          sliderModal.classList.remove('dark-mode-active');
+          darkModeBtn.classList.remove('active');
+          document.getElementById('sliderTrackContainer').classList.remove('disabled');
+          document.getElementById('ticksLabelsContainer').style.color = '#64748b';
+        }
+      } else {
+        darkModeBtn.style.display = 'none';
+        sliderModal.classList.remove('dark-mode-active');
+      }
+
+      if (activeMode === 'interior') {
+        modalInterior.style.display = 'flex';
+        modalRearWrapper.style.display = 'none';
+        sliderModal.classList.remove('rear-modal-active');
+        updateCardUI(id);
+      } else {
+        if (!data.isDarkMode) {
+          sliderModal.classList.add('rear-modal-active');
+        } else {
+          sliderModal.classList.remove('rear-modal-active');
+        }
+        modalInterior.style.display = 'none';
+        modalRearWrapper.style.display = 'flex';
+
+        const slideTarget = data.slideId || 1;
+        currentSlide = slideTarget;
+        for(let i=1; i<=3; i++) {
+          const slide = document.getElementById(`modal-slide-${i}`);
+          if(slide) {
+            if(i === slideTarget) slide.classList.add('active-slide');
+            else slide.classList.remove('active-slide');
+          }
+        }
+        updateGlassCardUI(id);
+      }
+      
+      onSliderChange(data.val);
+      sliderModal.style.display = 'flex';
+    }
+
+    function onSliderChange(val) {
+      if (!activeCardId) return;
+      
+      dynamicVibration();
+      
+      if (activeMode === 'interior') {
+        lightData[activeCardId].val = val;
+        if (val > 0) lightData[activeCardId].lastVal = val;
+        updateCardUI(activeCardId);
+      } else {
+        glassLightData[activeCardId].val = val;
+        if (val > 0) glassLightData[activeCardId].lastVal = val;
+        updateGlassCardUI(activeCardId);
+        
+        if (activeCardId === 3) {
+          const hoodBase = document.getElementById('hood-base-img');
+          const modalHoodBase = document.getElementById('modal-hood-base-img');
+          const targetSrc = (val == 0) ? 'car1.jpg' : '04_Front_3-4_Wide-edited (1).jpg';
+          if (!glassLightData[3].isDarkMode) {
+            if (hoodBase) hoodBase.src = targetSrc;
+            if (modalHoodBase) modalHoodBase.src = targetSrc;
+          }
+        }
+      }
+      
+      document.getElementById('modalValue').innerText = `${val}%`;
+      updateSliderFill(val);
+      updateModalBulb(val);
+      highlightNearestTick(val);
+    }
+
+    function updateSliderFill(val) {
+      const fill = document.getElementById('sliderFill');
+      const thumbRadiusPx = 52.5;
+      const trackHeightPx = 330;
+      const usableTrackHeight = trackHeightPx - (thumbRadiusPx * 2);
+      
+      const calculatedHeight = thumbRadiusPx + (val / 100) * usableTrackHeight;
+      fill.style.height = `${calculatedHeight}px`;
+      
+      const isDark = (activeMode === 'rear' && (activeCardId === 1 || activeCardId === 2 || activeCardId === 3) && glassLightData[activeCardId].isDarkMode);
+      if (isDark) {
+        fill.style.background = 'rgba(255, 255, 255, 0.2)';
+        fill.style.filter = 'none';
+      } else {
+        fill.style.background = 'linear-gradient(to top, #ffb703, #ffe082)';
+        fill.style.filter = `drop-shadow(0 0 ${val / 4}px rgba(255, 183, 3, ${val / 100}))`;
+      }
+      fill.style.opacity = Math.max(val / 100, 0.2);
+    }
+
+    function updateModalBulb(val) {
+      const modalBulb = document.getElementById('modalBulbIcon');
+      const bulbBg = document.getElementById('modalBulbBg');
+      const isDark = (activeMode === 'rear' && (activeCardId === 1 || activeCardId === 2 || activeCardId === 3) && glassLightData[activeCardId].isDarkMode);
+
+      if (isDark) {
+        modalBulb.style.color = 'rgba(255, 255, 255, 0.4)';
+        modalBulb.style.filter = 'none';
+        bulbBg.style.boxShadow = 'none';
+      } else if (val == 0) {
+        modalBulb.style.color = '#52525b';
+        modalBulb.style.filter = 'none';
+        bulbBg.style.boxShadow = 'none';
+      } else {
+        const opacity = val / 100;
+        modalBulb.style.color = `rgba(255, 183, 3, ${Math.max(opacity, 0.4)})`;
+        modalBulb.style.filter = `drop-shadow(0 0 ${val / 3}px rgba(255, 183, 3, ${opacity}))`;
+        bulbBg.style.boxShadow = `0 0 ${val / 2}px rgba(255, 183, 3, ${opacity * 0.4})`;
+      }
+    }
+
+    function highlightNearestTick(val) {
+      const ticks = [0, 20, 40, 60, 80, 100];
+      ticks.forEach(t => {
+        const row = document.getElementById(`tick-${t}`);
+        if (row) row.classList.remove('active');
+      });
+
+      let closest = ticks.reduce((prev, curr) => {
+        return (Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev);
+      });
+
+      const activeRow = document.getElementById(`tick-${closest}`);
+      if (activeRow) {
+        activeRow.classList.add('active');
+      }
+    }
+
+    function closeControl() {
+      triggerVibration(35);
+      if (activeMode === 'rear' && activeCardId >= 1 && activeCardId <= 3) {
+        const data = glassLightData[activeCardId];
+        if (data.isDarkMode) {
+          toggleDarkMode();
+        }
+      }
+      document.getElementById('sliderModal').style.display = 'none';
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      for(let i=1; i<=4; i++) {
+        updateCardUI(i);
+        setupCardEvents(i);
+        if(i <= 4) {
+          updateGlassCardUI(i);
+          setupGlassCardEvents(i);
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
